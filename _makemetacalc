@@ -1,0 +1,78 @@
+#!/usr/bin/perl
+#	Copyright 2011,2012 Dmitri Pervouchine (dp@crg.eu)
+#	This file is a part of the IRBIS package.
+#	IRBIS package is free software: you can redistribute it and/or modify
+#	it under the terms of the GNU General Public License as published by
+#	the Free Software Foundation, either version 3 of the License, or
+#	(at your option) any later version.
+#	
+#	IRBIS package is distributed in the hope that it will be useful,
+#	but WITHOUT ANY WARRANTY; without even the implied warranty of
+#	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#	GNU General Public License for more details.
+#	
+#	You should have received a copy of the GNU General Public License
+#	along with IRBIS package.  If not, see <http://www.gnu.org/licenses/>.
+
+open FILE, ">metacalc";
+print FILE "include makefile
+TRIM=./trim
+IRBIS=./irbis
+TOPDF=./_tab2pdf
+TOMAF=./_tab2maf
+.PHONY: all clean
+all::\tinsect mammal vertebrate nematode
+ss::\tinsect-ss mammal-ss vertebrate-ss nematode-ss
+clean:\tinsect-clean mammal-clean vertebrate-clean nematode-clean\n\n";
+
+print FILE do_cmd('insect','insect','dm3',	["snoRNA", "snRNA", "ncRNA", "cspcg", "ncpcg"], {"cspcg"=>"ncpcg"}, "-t .75 -L 12 -g 1 ");
+print FILE do_cmd('nematode','nematode','ce6',	["snoRNA", "snRNA", "ncRNA", "cspcg", "ncpcg"], {"cspcg"=>"ncpcg"}, "-t .75 -L 12 -g 1 ");
+
+print FILE do_cmd('vertebrate','mammal',    'hg19', ["snoRNA", "snRNA", "lncRNA", "cspcg", "ncpcg"], {"cspcg"=>"ncpcg"}, "-t .8 -L 12 -g 1 ");
+print FILE do_cmd('vertebrate','vertebrate','hg19', ["snoRNA", "snRNA", "lncRNA", "cspcg", "ncpcg"], {"cspcg"=>"ncpcg"}, "-t .5 -L 12 -g 1 ");
+
+
+sub do_cmd {
+    my $metaname = @_[0];
+    my $outname  = @_[1];
+    my $dbname   = @_[2];
+    my @biotypes = @{@_[3]};
+    my %donottouch = %{@_[4]};
+    my $params   = @_[5];
+
+    my $cmd = undef;
+    my $all  = undef;
+    my $ss = undef;
+    my $fix  = "\tmkdir -p \${OUTDIR}$outname/\n";
+
+    foreach $biotype(@biotypes) {
+    	$cmd.= "\${OUTDIR}$outname/$biotype.met:\t\${METADATA}$metaname/$biotype.cps $outname.cfg\n";
+	$cmd.= "$fix\t\${TRIM} -i $outname.cfg -r \${METADATA}$metaname/$biotype.cps -o \${OUTDIR}$outname/$biotype.met\n";
+	$cmd.= "\${OUTDIR}$outname/$biotype\_rc.met:\t\${METADATA}$metaname/$biotype.cps $outname.cfg\n";
+        $cmd.= "$fix\t\${TRIM} -i $outname.cfg -r \${METADATA}$metaname/$biotype.cps -o \${OUTDIR}$outname/$biotype\_rc.met -rc\n";
+    	$all.= "\${OUTDIR}$outname/$biotype.met \${OUTDIR}$outname/$biotype\_rc.met ";
+    }
+
+    for($i=0;$i<@biotypes;$i++) {
+    	for($j=$i+1;$j<@biotypes;$j++) {
+	    next if($donottouch{$biotypes[$i]} eq $biotypes[$j]);
+	    $cmd.= "\${OUTDIR}$outname/$biotypes[$i]\_$biotypes[$j].tab:\t\${OUTDIR}$outname/$biotypes[$i].met \${OUTDIR}$outname/$biotypes[$j].met\n";
+	    $cmd.= "$fix\t\${IRBIS} -l \${OUTDIR}$outname/$biotypes[$i].met -r \${OUTDIR}$outname/$biotypes[$j].met -o \${OUTDIR}$outname/$biotypes[$i]\_$biotypes[$j].tab $params -v\n";
+	    $cmd.= "\${OUTDIR}$outname/$biotypes[$i]\_$biotypes[$j]\_rc.tab:\t\${OUTDIR}$outname/$biotypes[$i].met \${OUTDIR}$outname/$biotypes[$j]\_rc.met\n";
+	    $cmd.= "$fix\t\${IRBIS} -l \${OUTDIR}$outname/$biotypes[$i].met -r \${OUTDIR}$outname/$biotypes[$j]\_rc.met -o \${OUTDIR}$outname/$biotypes[$i]\_$biotypes[$j]\_rc.tab $params -v\n";
+	    $all.= "\${OUTDIR}$outname/$biotypes[$i]\_$biotypes[$j].tab \${OUTDIR}$outname/$biotypes[$i]\_$biotypes[$j]\_rc.tab ";
+    	}
+    }
+
+    foreach $biotype(@biotypes) {
+	$cmd.= "\${OUTDIR}$outname/$biotype\_SS.pdf:\t$outname.cfg \${OUTDIR}$outname/$biotype\_SS.maf \${OUTDIR}$outname/$biotype\_SS.tab\n";
+	$cmd.= "$fix\t\${TOPDF} -l $outname.cfg -r $outname.cfg -i \${OUTDIR}$outname/$biotype\_SS.tab -m \${OUTDIR}$outname/$biotype\_SS.maf -o \${OUTDIR}$outname/$biotype\_SS.pdf -notitle\n";
+	$cmd.= "\${OUTDIR}$outname/$biotype\_SS.maf:\t$outname.cfg \${OUTDIR}$outname/$biotype\_SS.tab\n";
+	$cmd.= "$fix\t\${TOMAF} -l $outname.cfg -r $outname.cfg -i \${OUTDIR}$outname/$biotype\_SS.tab -o \${OUTDIR}$outname/$biotype\_SS.maf $params\n";
+	$cmd.= "\${OUTDIR}$outname/$biotype\_SS.tab:\t$outname.cfg \${OUTDIR}$outname/$biotype.met\n";
+	$cmd.= "$fix\t\${IRBIS} -l \${OUTDIR}$outname/$biotype.met -r \${OUTDIR}$outname/$biotype.met -o \${OUTDIR}$outname/$biotype\_SS.tab $params -u 1 -B \${METADATA}$metaname/$dbname.a2a\n";
+
+	$ss.= "\${OUTDIR}$outname/$biotype\_SS.pdf \${OUTDIR}$outname/$biotype\_SS.maf \${OUTDIR}$outname/$biotype\_SS.tab ";
+    }
+    return("$outname:\t$all\n$outname-ss:$ss\n$outname-clean:\n\trm -f $all $ss\n\n$cmd");
+}

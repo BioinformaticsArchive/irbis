@@ -1,0 +1,59 @@
+#!/usr/bin/perl
+#	Copyright 2011,2012 Dmitri Pervouchine (dp@crg.eu)
+#	This file is a part of the IRBIS package.
+#	IRBIS package is free software: you can redistribute it and/or modify
+#	it under the terms of the GNU General Public License as published by
+#	the Free Software Foundation, either version 3 of the License, or
+#	(at your option) any later version.
+#	
+#	IRBIS package is distributed in the hope that it will be useful,
+#	but WITHOUT ANY WARRANTY; without even the implied warranty of
+#	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#	GNU General Public License for more details.
+#	
+#	You should have received a copy of the GNU General Public License
+#	along with IRBIS package.  If not, see <http://www.gnu.org/licenses/>.
+
+
+if(@ARGV==0) {
+    print STDERR "Usage $0 -i input_file -s subset_file -ic input_column (1-based) -sc subset_column -h header -p include names with period ENSG000.0\n";
+    exit(1);
+}
+
+$input_column = 1;
+$subset_column = 1;
+$separator = 1;
+
+for(my $i=0;$i<@ARGV;$i++) {
+    $input  = $ARGV[++$i]   if($ARGV[$i] eq "-i");
+    $subset = $ARGV[++$i]   if($ARGV[$i] eq "-s");
+    $input_column  = $ARGV[++$i] if($ARGV[$i] eq "-ic");
+    $subset_column = $ARGV[++$i] if($ARGV[$i] eq "-sc");
+    $header = 1		    if($ARGV[$i] eq "-h");
+}
+
+if($subset) {
+    @subset = split /\n/, `cat $subset`;
+}
+else {
+    print STDERR "[$0 WARNING: subset set to STDIN]"; 
+    while($line=<STDIN>) {
+	chomp $line;
+	push @subset, $line;
+    }
+}
+
+foreach $line(@subset) {
+    @arr = split /\t/, $line;
+    $id  = $arr[$subset_column-1];
+    ($id) = split /\./, $id if($separator);
+    $f{$id}++;
+}
+
+foreach $line(split /\n/, `cat $input`) {
+    @arr = split /\t/, $line;
+    $id  = $arr[$input_column-1];
+    ($id) = split /\./, $id if($separator);
+    print "$line\n" if($f{$id} || $header);
+    $header = undef;
+}

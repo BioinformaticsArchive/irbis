@@ -1,0 +1,43 @@
+#!/usr/bin/perl
+#	Copyright 2011,2012 Dmitri Pervouchine (dp@crg.eu)
+#	This file is a part of the IRBIS package.
+#	IRBIS package is free software: you can redistribute it and/or modify
+#	it under the terms of the GNU General Public License as published by
+#	the Free Software Foundation, either version 3 of the License, or
+#	(at your option) any later version.
+#	
+#	IRBIS package is distributed in the hope that it will be useful,
+#	but WITHOUT ANY WARRANTY; without even the implied warranty of
+#	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#	GNU General Public License for more details.
+#	
+#	You should have received a copy of the GNU General Public License
+#	along with IRBIS package.  If not, see <http://www.gnu.org/licenses/>.
+
+use utils;
+make_download();
+
+open FILE, ">database";
+print FILE ".PHONY: all clean remove
+include download
+include special
+
+
+MAPPER  = ./map_single
+MATCHER = ./best_match
+BEDDER  = ./_out2bed
+SEGMENT = ./getsegm
+WINDOW  = ./getwind
+TRANSF  = ./transf
+MUFFER  = ./getmuf
+INDEXING= ./indexing
+SEGPAR  = -m 8 -l 5000
+
+";
+
+print FILE  make_clade(vertebrate, ["SF1", "HNRNPL", "PTPRC", "ZFX", "ZFY","HIST", "DST"], []);
+print FILE  make_clade(insect, ["Nmnat", "slo", "Ca-alpha1D", "Dscam"], ["ncRNA"]);
+print FILE  make_clade(nematode, ["lin-49"], ["ncRNA"]);
+
+print FILE "all:: $all_name\nclean: $clean_name\nremove:$remove_name";
+close FILE;

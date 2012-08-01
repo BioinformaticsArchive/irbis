@@ -1,0 +1,66 @@
+#!/usr/bin/perl
+#	Copyright 2011,2012 Dmitri Pervouchine (dp@crg.eu)
+#	This file is a part of the IRBIS package.
+#	IRBIS package is free software: you can redistribute it and/or modify
+#	it under the terms of the GNU General Public License as published by
+#	the Free Software Foundation, either version 3 of the License, or
+#	(at your option) any later version.
+#	
+#	IRBIS package is distributed in the hope that it will be useful,
+#	but WITHOUT ANY WARRANTY; without even the implied warranty of
+#	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#	GNU General Public License for more details.
+#	
+#	You should have received a copy of the GNU General Public License
+#	along with IRBIS package.  If not, see <http://www.gnu.org/licenses/>.
+
+
+die unless(@ARGV==5);
+
+($meta, $conf, $linc, $segm, $param) = @ARGV;
+
+$meta = "/users/rg/dmitri/db/metadata/$meta";
+$outp = "/users/rg/dmitri/db/result/$conf";
+
+%a = split /[\t\n]/, `cut -f5,6 $meta/$linc.cps`;
+%b = split /[\t\n]/, `cut -f5,6 $meta/$segm.cps`;
+
+print STDERR 0+keys(%a),"\n";
+print STDERR 0+keys(%b),"\n";
+
+@a = keys(%a);
+@b = keys(%b);
+
+for($N=1;$N<=20;$N++) {
+    print STDERR "Iteration:$N\t";
+    %sample=();
+    for($i=0;$i<@a;$i++) {
+    	do {
+	    $k = int(rand()*@b);
+    	} while($sample{$b[$k]} || $b{$b[$k]} ne $a{$a[$i]});
+        $sample{$b[$k]} = $i;
+    }
+    print STDERR 0+keys(%sample),"\t";
+
+    open FILEA, ">$meta/aprime.cps";
+    open FILEB, ">$meta/bprime.cps";
+    foreach $line(split /\n/, `cat $meta/$segm.cps`) {
+    	@x = split /\t/, $line;
+    	$id = $x[4];
+    	print FILEA "$line\n" if($sample{$id});
+    	print FILEB "$line\n" unless($sample{$id});
+    }
+    close FILEA;
+    close FILEB;
+
+    $v = "-v";
+    ($x1) = split /\s/, `irbis -l $outp/$linc.met -r $outp/$segm.met     -rr $meta/bprime.cps -o $outp/tmp$$.tab $param $v`;
+    ($x0) = split /\s/, `irbis -l $outp/$linc.met -r $outp/$segm\_rc.met -rr $meta/bprime.cps -o $outp/tmp$$.tab $param $v`;
+
+    ($y1) = split /\s/, `irbis -l $outp/$segm.met -lr $meta/aprime.cps -r $outp/$segm.met     -rr $meta/bprime.cps -o $outp/tmp$$.tab $param $v`;
+    ($y0) = split /\s/, `irbis -l $outp/$segm.met -lr $meta/aprime.cps -r $outp/$segm\_rc.met -rr $meta/bprime.cps -o $outp/tmp$$.tab $param $v`;
+
+    print "$N\t$x1\t$x0\t$y1\t$y0\n";
+    print STDERR "$x1\t$x0\t$y1\t$y0\n";
+    system("rm -f $meta/aprime.cps $meta/bprime.cps $outp/tmp$$.tab");
+}

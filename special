@@ -1,0 +1,51 @@
+VERTEBRATE = ${METADATA}vertebrate/
+INSECT	   = ${METADATA}insect/
+NEMATODE   = ${METADATA}nematode/
+ANNOT	   = ~/db/annotation/
+
+${ANNOT}Drosophila_melanogaster.BDGP5.25.64.gtf:
+	mkdir -p ${ANNOT}
+	wget ftp://ftp.ensembl.org/pub/release-64/gtf/drosophila_melanogaster/Drosophila_melanogaster.BDGP5.25.64.gtf.gz -O ${ANNOT}Drosophila_melanogaster.BDGP5.25.64.gtf.gz
+	gunzip ${ANNOT}Drosophila_melanogaster.BDGP5.25.64.gtf.gz
+
+${ANNOT}gencode.v7.annotation.gtf:
+	mkdir -p ${ANNOT}
+	wget ftp://ftp.sanger.ac.uk/pub/gencode/release_7/gencode.v7.annotation.gtf.gz -O ${ANNOT}gencode.v7.annotation.gtf.gz
+	gunzip ${ANNOT}gencode.v7.annotation.gtf.gz
+
+${ANNOT}Caenorhabditis_elegans.WS220.65.gtf:
+	mkdir -p ${ANNOT}
+	wget ftp://ftp.ensembl.org/pub/release-65/gtf/caenorhabditis_elegans/Caenorhabditis_elegans.WS220.65.gtf.gz -O ${ANNOT}Caenorhabditis_elegans.WS220.65.gtf.gz
+	gunzip ${ANNOT}Caenorhabditis_elegans.WS220.65.gtf.gz
+
+${ANNOT}Gencode_lncRNAsv7_summaryTable.txt:
+	mkdir -p ${ANNOT}
+	wget http://genome.crg.es/~rjohnson/lncrna_webpage_data/Gencode_lncRNAsv7_summaryTable_02_14_2012.txt -O ${ANNOT}Gencode_lncRNAsv7_summaryTable.txt
+	#gunzip ${ANNOT}Gencode_lncRNAsv7_summaryTable_10-01-2011.txt.gz
+
+#######################################################################################################################################
+
+${VERTEBRATE}hg19.cps:   ${ANNOT}gencode.v7.annotation.gtf
+	mkdir -p ${VERTEBRATE}
+	./_gen_loci -i ${ANNOT}gencode.v7.annotation.gtf > ${VERTEBRATE}hg19.glc
+	./_gtf2db -db ${VERTEBRATE}hg19 -i ${ANNOT}gencode.v7.annotation.gtf
+
+${INSECT}dm3.cps:	${ANNOT}Drosophila_melanogaster.BDGP5.25.64.gtf
+	mkdir -p ${INSECT}
+	./_gtf2db -db ${INSECT}dm3 -i ${ANNOT}Drosophila_melanogaster.BDGP5.25.64.gtf
+
+${NEMATODE}ce6.cps:	${ANNOT}Caenorhabditis_elegans.WS220.65.gtf
+	mkdir -p ${NEMATODE}
+	./_gtf2db -db ${NEMATODE}ce6 -i ${ANNOT}Caenorhabditis_elegans.WS220.65.gtf -full
+
+#######################################################################################################################################
+
+${ANNOT}Gencode_lncRNAsv7_summaryTable_intergenic.txt: ${ANNOT}Gencode_lncRNAsv7_summaryTable.txt
+	awk '$$7=="intergenic"' ${ANNOT}Gencode_lncRNAsv7_summaryTable.txt > ${ANNOT}Gencode_lncRNAsv7_summaryTable_intergenic.txt
+
+${VERTEBRATE}lncRNA.cps: ${ANNOT}Gencode_lncRNAsv7_summaryTable_intergenic.txt ${VERTEBRATE}hg19.cps
+	./_intergenic_lncrna -s ${VERTEBRATE}hg19.cps -i ${ANNOT}Gencode_lncRNAsv7_summaryTable_intergenic.txt | sort -u -k 5 > ${VERTEBRATE}lncRNA.cps
+
+vertebrate:: ${VERTEBRATE}lncRNA.cps 
+vertebrate-remove:: 
+	rm -f -r ${VERTEBRATE}lncRNA.cps
