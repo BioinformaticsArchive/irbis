@@ -3,9 +3,13 @@ OPTN = -O3
 EXPORT = irbis-1.7.4
 PROGRAMS=map_single best_match transf getsegm getwind getmuf trim irbis extend indexing correlation
 
-CHAIN    = ~/db/chain/
-SEQ      = ~/db/genome/
-SOURCE   = ~/db/download/
+################# ATTENTION THIS IS SET UP TO BE DP'S HOME DIRECTORY TO SAVE SPACE ######################
+
+DBDIR=/home/dp/ 
+
+CHAIN    = $(DBDIR)chain/
+SEQ      = $(DBDIR)genome/
+SOURCE   = $(DBDIR)download/
 METADATA = ~/db/metadata/
 OUTDIR   = ~/db/output/
 
