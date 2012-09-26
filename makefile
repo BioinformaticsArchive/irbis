@@ -3,7 +3,8 @@ OPTN = -O3
 EXPORT = irbis-1.7.4
 PROGRAMS=map_single best_match transf getsegm getwind getmuf trim irbis extend indexing correlation
 
-################# ATTENTION THIS IS SET UP TO BE DP'S HOME DIRECTORY TO SAVE SPACE ######################
+################# ATTENTION THIS IS SET UP TO BE DP'S HOME DIRECTORY TO SAVE SPACE  ######################
+################# RENAME THIS VARIABLE IF YOU HAVE TO USER CALLED DP IN HOME FOLDER ######################
 
 DBDIR=/home/dp/ 
 
