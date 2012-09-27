@@ -6,12 +6,11 @@ PROGRAMS=map_single best_match transf getsegm getwind getmuf trim irbis extend i
 ################# ATTENTION THIS IS SET UP TO BE DP'S HOME DIRECTORY TO SAVE SPACE  ######################
 ################# RENAME THIS VARIABLE IF YOU HAVE TO USER CALLED DP IN HOME FOLDER ######################
 
-#DBDIR=/home/dp/db/ # Please use this if you are a ma.fbb.msu.ru user
-DBDIR=~/db/	# Use this path otherwise
+FIXEDPATH=~/db/
 
-CHAIN    = $(DBDIR)chain/
-SEQ      = $(DBDIR)genome/
-SOURCE   = $(DBDIR)download/
+CHAIN    = ${FIXEDPATH}chain/
+SEQ      = ${FIXEDPATH}genome/
+SOURCE   = ${FIXEDPATH}download/
 METADATA = ~/db/metadata/
 OUTDIR   = ~/db/output/
 
