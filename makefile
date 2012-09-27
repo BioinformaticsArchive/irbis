@@ -6,7 +6,7 @@ PROGRAMS=map_single best_match transf getsegm getwind getmuf trim irbis extend i
 ################# ATTENTION THIS IS SET UP TO BE DP'S HOME DIRECTORY TO SAVE SPACE  ######################
 ################# RENAME THIS VARIABLE IF YOU HAVE TO USER CALLED DP IN HOME FOLDER ######################
 
-#DBDIR=/home/dp/ # Please use this if you are a ma.fbb.msu.ru user
+#DBDIR=/home/dp/db/ # Please use this if you are a ma.fbb.msu.ru user
 DBDIR=~/db/	# Use this path otherwise
 
 CHAIN    = $(DBDIR)chain/
