@@ -190,7 +190,8 @@ int main(int argc, char* argv[]) {
 		}
 		l = end[i][k]-beg[i][k];
 		if(l==0) continue;
-		beg[i][k]-=margin;
+		beg[i][k]-= margin;
+		end[i][k]+= margin;
 		l+=2*margin;
 //		if(l>MAXLONGBUFFLENGTH-2) l = MAXLONGBUFFLENGTH-2;
 		p = beg[i][k] - 1 + (str[i][k]=='-' ? 1 : 0);
@@ -212,7 +213,7 @@ int main(int argc, char* argv[]) {
                 if(output_type==OUTPUT_TABSQ) 
 		    fprintf(outfile,"%s\t%s\n",ids[i][k], longbuff);
 		if(output_type==OUTPUT_TBMAF) 
-		    fprintf(outfile,"%s\t%s\t%li\t%li\t%c\t%li\t%s\n",ids[i][k], chr_name, (str[i][k]=='+' ? beg[i][k] : seqlen - end[i][k] + margin), l, str[i][k], seqlen, longbuff);
+		    fprintf(outfile,"%s\t%s\t%li\t%li\t%c\t%li\t%s\n",ids[i][k], chr_name, (str[i][k]=='+' ? beg[i][k] : seqlen - end[i][k]), l, str[i][k], seqlen, longbuff);
 	    }
             offset+= (seqlen % 8 == 0) ? seqlen/8 : (seqlen/8 + 1);
 	}
