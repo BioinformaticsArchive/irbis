@@ -212,7 +212,7 @@ int main(int argc, char* argv[]) {
                 if(output_type==OUTPUT_TABSQ) 
 		    fprintf(outfile,"%s\t%s\n",ids[i][k], longbuff);
 		if(output_type==OUTPUT_TBMAF) 
-		    fprintf(outfile,"%s\t%s\t%li\t%li\t%c\t%li\t%s\n",ids[i][k], chr_name, (str[i][k]=='+' ? beg[i][k] : seqlen - end[i][k]), l, str[i][k], seqlen, longbuff);
+		    fprintf(outfile,"%s\t%s\t%li\t%li\t%c\t%li\t%s\n",ids[i][k], chr_name, (str[i][k]=='+' ? beg[i][k] : seqlen - end[i][k] + margin), l, str[i][k], seqlen, longbuff);
 	    }
             offset+= (seqlen % 8 == 0) ? seqlen/8 : (seqlen/8 + 1);
 	}

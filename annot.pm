@@ -103,7 +103,7 @@ sub drawboxes {
 	    $h = round(($h1 + $h2)/2);
 	    $h-= round($H3 + log(1+abs($z1-$z2))) if($h1 eq $h2);
 	    $head = "\\color{$c!95}\\draw[ultra thick] ($b1,$h1) -- ($e1, $h1);\\draw[ultra thick] ($b2,$h2) -- ($e2, $h2);";
-            $out.= ($h1 eq $h2) ? "{$head \\draw ($z1,$h1) .. controls ($z,$h) .. ($z2,$h2);}" : "{$head \\draw ($z1,$h1) -- ($z2,$h2);}\n";
+            $out.= ($h1 eq $h2) ? "{$head \\draw ($z1,$h1) .. controls ($z,$h) .. ($z2,$h2);}" : "{$head \\draw ($z1,$h1) -- ($z2,$h2);}\n" if($1 eq $col{$pair->[0]}{$pair->[1]});
 	    $out.= "{\\color{Yellow}\\draw[thick] ($z1,$h1) circle (3) ($z2,$h2) circle (4); }" if($1 eq $col{$pair->[0]}{$pair->[1]});
 	}
     }

@@ -35,9 +35,9 @@ SEGPAR  = -m 8 -l 5000
 
 ";
 
-print FILE  make_clade(vertebrate, ["SF1", "HNRNPL", "PTPRC", "ZFX", "ZFY","HIST", "DST"], []);
+print FILE  make_clade(vertebrate, ["SF1", "HNRNPL", "PTPRC", "ZFX", "ZFY","HIST", "DST","KCNMA1","PTBP1","FOXP1","MAP3K4","MBNL1","MBNL2"], []);
 print FILE  make_clade(insect, ["Nmnat", "slo", "Ca-alpha1D", "Dscam"], ["ncRNA"]);
-print FILE  make_clade(nematode, ["lin-49"], ["ncRNA"]);
+print FILE  make_clade(nematode, ["lin-49","slo-1"], ["ncRNA"]);
 
 print FILE "all:: $all_name\nclean: $clean_name\nremove:$remove_name";
 close FILE;

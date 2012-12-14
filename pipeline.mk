@@ -31,6 +31,9 @@ ${OUTDIR}${SPECIES}/${RIGHT}.met:	${METADATA}${DOMAIN}/${RIGHT}.cps
 ${OUTDIR}${SPECIES}/${OUT}.tab:	${OUTDIR}${SPECIES}/${LEFT}.met ${OUTDIR}${SPECIES}/${RIGHT}.met
 	./irbis -l ${OUTDIR}${SPECIES}/${LEFT}.met -r ${OUTDIR}${SPECIES}/${RIGHT}.met -o ${OUTDIR}${SPECIES}/${OUT}.tab ${PARAMS}
 
+${OUTDIR}${SPECIES}/${OUT}.bed: ${OUTDIR}${SPECIES}/${OUT}.tab ${SPECIES}.cfg
+	./_tab2bed -s ${SPECIES}.cfg -i ${OUTDIR}${SPECIES}/${OUT}.tab -o ${OUTDIR}${SPECIES}/${OUT}.bed
+
 ${OUTDIR}${SPECIES}/${OUT}.maf: ${SPECIES}.cfg ${OUTDIR}${SPECIES}/${OUT}.tab
 	./_tab2maf -l ${SPECIES}.cfg -r ${SPECIES}.cfg -i ${OUTDIR}${SPECIES}/${OUT}.tab -o ${OUTDIR}${SPECIES}/${OUT}.maf ${PARAMS}
 

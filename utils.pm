@@ -179,7 +179,7 @@ sub make_clade {
 	}
 
 	$bed_command.= "\$(METADATA)$clade/$z.bed:\t$f\n\t\$(BEDDER) $g -i $f -o \$(METADATA)$clade/$z.bed\n";
-    	$sus_command.= "\$(METADATA)$clade/$z.sus:\t\$(METADATA)$clade/$z.bed \$(SEQ)$clade/$z.idx \$(SEQ)$clade/$z.dbx\n";
+    	$sus_command.= "\$(METADATA)$clade/$z.sus:\t\$(METADATA)$clade/$z.bed \$(SEQ)$clade/$z.idx \$(SEQ)$clade/$z.dbx \$(SEGMENT)\n";
 	$sus_command.= "\t\$(SEGMENT) -i \$(METADATA)$clade/$z.bed -d \$(SEQ)$clade/$z -o \$(METADATA)$clade/$z.sus.uns \$(SEGPAR)\n";
 	$sus_command.= "\tsort -n -k 1 \$(METADATA)$clade/$z.sus.uns > \$(METADATA)$clade/$z.sus\n\trm -f \$(METADATA)$clade/$z.sus.uns\n";
 	$suw_command.= "\$(METADATA)$clade/$z.sus.ind:\t\$(METADATA)$clade/$z.sus\n\t\$(INDEXING) -dir \$(METADATA)$clade/ -file $z.sus -suffix .ind\n";

@@ -21,6 +21,9 @@ ${OUTDIR}${SPECIES}/${NAME}.met:        ${METADATA}${DOMAIN}/${NAME}.cps
 ${OUTDIR}${SPECIES}/${NAME}.tab: ${OUTDIR}${SPECIES}/${NAME}.met ${OUTDIR}${SPECIES}/${NAME}.met
 	./irbis -l ${OUTDIR}${SPECIES}/${NAME}.met -r ${OUTDIR}${SPECIES}/${NAME}.met -o ${OUTDIR}${SPECIES}/${NAME}.tab ${PARAMS}
 
+${OUTDIR}${SPECIES}/${NAME}.bed: ${OUTDIR}${SPECIES}/${NAME}.tab ${SPECIES}.cfg
+	./_tab2bed -i ${OUTDIR}${SPECIES}/${NAME}.tab -s ${SPECIES}.cfg -o ${OUTDIR}${SPECIES}/${NAME}.bed
+
 ${OUTDIR}${SPECIES}/${NAME}.maf: ${SPECIES}.cfg ${OUTDIR}${SPECIES}/${NAME}.tab
 	./_tab2maf -l ${SPECIES}.cfg -r ${SPECIES}.cfg -i ${OUTDIR}${SPECIES}/${NAME}.tab -o ${OUTDIR}${SPECIES}/${NAME}.maf -maf ${METADATA}${DOMAIN}/${NAME}.mus ${PARAMS}
 
@@ -31,6 +34,7 @@ view:   ${OUTDIR}${SPECIES}/${NAME}.pdf
 	acroread ${OUTDIR}${SPECIES}/${NAME}.pdf
 
 tab:    ${OUTDIR}${SPECIES}/${NAME}.tab
+bed:	${OUTDIR}${SPECIES}/${NAME}.bed
 maf:    ${OUTDIR}${SPECIES}/${NAME}.maf
 pdf:    ${OUTDIR}${SPECIES}/${NAME}.pdf
 
