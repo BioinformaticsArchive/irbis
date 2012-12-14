@@ -44,6 +44,7 @@ view:	${OUTDIR}${SPECIES}/${OUT}.pdf
 	acroread ${OUTDIR}${SPECIES}/${OUT}.pdf
 
 tab:	${OUTDIR}${SPECIES}/${OUT}.tab
+bed:	${OUTDIR}${SPECIES}/${OUT}.bed
 maf:	${OUTDIR}${SPECIES}/${OUT}.maf
 pdf:	${OUTDIR}${SPECIES}/${OUT}.pdf
 
