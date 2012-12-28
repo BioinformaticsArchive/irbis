@@ -1,0 +1,74 @@
+#!/usr/bin/perl
+#	Copyright 2011,2012 Dmitri Pervouchine (dp@crg.eu)
+#	This file is a part of the IRBIS package.
+#	IRBIS package is free software: you can redistribute it and/or modify
+#	it under the terms of the GNU General Public License as published by
+#	the Free Software Foundation, either version 3 of the License, or
+#	(at your option) any later version.
+#	
+#	IRBIS package is distributed in the hope that it will be useful,
+#	but WITHOUT ANY WARRANTY; without even the implied warranty of
+#	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#	GNU General Public License for more details.
+#	
+#	You should have received a copy of the GNU General Public License
+#	along with IRBIS package.  If not, see <http://www.gnu.org/licenses/>.
+
+use utils;
+
+@palette = ([255,0,0], [0,255,0], [0,0,255], [255,255,0], [0,255,255], [255,0,255], [192,192,192], [128,128,128], [128,0,0], [128,128,0], [0,128,0], [128,0,128], [0,128,128], [0,0,128]);
+
+if(@ARGV==0) {
+    print STDERR "Creates bed file loadable by genome browser\n";
+    print STDERR "Usage: $0 -s [species file] -i [tab output] -o [output file]\n";
+    exit(1);
+}
+
+$species  = 0;
+
+for(my $i=0;$i<@ARGV;$i++) {
+    $tab_file   = $ARGV[++$i] if($ARGV[$i] eq "-i");
+    $cfg_file   = $ARGV[++$i] if($ARGV[$i] eq "-s");
+    $out_file   = $ARGV[++$i] if($ARGV[$i] eq "-o");
+    $species    = $ARGV[++$i] if($ARGV[$i] eq "-N");
+}
+
+die("tab file doesn't exist, exiting\n") unless(-e $tab_file);
+die("cfg file doesn't exist, exiting\n") unless(-e $cfg_file);
+
+read_configuration($cfg_file);
+$file = "$path$species[0]$extention";
+
+die("$file - file doesn't exist\n") unless(-e $file);
+print STDERR "[$file";
+foreach $line(split /\n/, `cat $file`) {
+    ($id, $chr, $pos, $len, $str, $totlen) = split /\t/, $line;
+    $chr[$id] = $chr;
+    $pos[$id] = $str eq "+" ? $pos : $totlen - $pos;
+    $str[$id] = $str eq "+" ? 1 : -1;
+}
+print STDERR "]\n";
+
+die("$tab_file - file doesn't exist\n") unless(-e $tab_file);
+foreach $line(split /\n/, `cat $tab_file`) {
+    ($n, $left, $right, $len, $x1, $x2, $y1, $y2, $c1, $c2, $s1, $s2) = split /\t/, $line;
+    next unless($n==$species);
+    push @level, doit($left,  $x1, $x2, $s1, $m), doit($right, $y1, $y2, $s2, $m);
+    $m++; 
+    $m=0 if($m>=@palette);
+}
+
+open FILE, ">$out_file";
+print FILE "track name=Boxes  description=\"Boxes of $tab_file\" itemRgb=\"On\" \n",join("\n",@level),"\n";
+close FILE;
+
+sub doit {
+    my $x = $pos[@_[0]] + @_[1]*$str[@_[0]];
+    my $y = $pos[@_[0]] + @_[2]*$str[@_[0]];
+    ($x, $y) = sort {$a<=>$b} ($x, $y);
+    return(join("\t", ($chr[@_[0]], $x, $y, @_[3], 1000, $str[@_[0]]>0 ? "+" : "-"), $x, $y, "$palette[$m]->[0],$palette[$m]->[1],$palette[$m]->[2]"));
+}
+
+
+
+
